@@ -1,0 +1,6 @@
+@prefix schema: <https://schema.org/> .
+@prefix ex: <https://example.org/> .
+
+ex:User a schema:Person .
+ex:Movie a schema:Movie .
+ex:rates a schema:Action .

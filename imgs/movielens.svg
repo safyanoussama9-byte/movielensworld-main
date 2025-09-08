@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="260">
+<circle cx="140" cy="120" r="40" fill="#dff"/>
+<text x="120" y="125" font-size="14">User</text>
+<circle cx="360" cy="120" r="40" fill="#ffd"/>
+<text x="340" y="125" font-size="14">Movie</text>
+<line x1="180" y1="120" x2="320" y2="120" stroke="#333"/>
+<text x="230" y="110" font-size="12">rates</text>
+</svg>

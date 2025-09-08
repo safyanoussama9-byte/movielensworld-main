@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="220">
+<rect x="10" y="40" width="200" height="60" fill="#eef"/>
+<text x="30" y="75" font-size="16">CSV (users/movies/ratings)</text>
+<line x1="210" y1="70" x2="300" y2="70" stroke="#333"/>
+<rect x="300" y="40" width="200" height="60" fill="#efe"/>
+<text x="320" y="75" font-size="16">Preprocessing</text>
+<line x1="500" y1="70" x2="590" y2="70" stroke="#333"/>
+<rect x="590" y="40" width="120" height="60" fill="#fee"/>
+<text x="600" y="75" font-size="16">Model</text>
+<text x="20" y="150" font-size="14">MovieLens-style Recommender Pipeline</text>
+</svg>
