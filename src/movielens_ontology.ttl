@@ -1,0 +1,86 @@
+@prefix ml:   <http://example.org/movielens/ontology#> .
+@prefix ex:   <http://example.org/movielens/resource/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix schema: <https://schema.org/> .
+@prefix dbo:  <http://dbpedia.org/ontology/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+ml: a owl:Ontology ;
+  rdfs:label "MovieLens Ontology (mini)"@en ;
+  rdfs:comment "Lightweight ontology to model MovieLens-like data (users, movies, ratings, tags, sessions) and connect to schema.org/DBpedia."@en ;
+  owl:versionInfo "1.0.0" .
+
+ml:Movie a owl:Class ; rdfs:subClassOf schema:Movie , dbo:Film ;
+  rdfs:label "Movie"@en ; rdfs:comment "A film/work present in the catalog."@en .
+ml:User a owl:Class ; rdfs:subClassOf foaf:Person ;
+  rdfs:label "User"@en ; rdfs:comment "End user who rates/tags movies."@en .
+ml:Rating a owl:Class ; rdfs:subClassOf schema:Rating ;
+  rdfs:label "Rating"@en ; rdfs:comment "A rating event created by a user for a movie."@en .
+ml:Tag a owl:Class ; rdfs:subClassOf skos:Concept ;
+  rdfs:label "Tag"@en ; rdfs:comment "Keyword a user can attach to a movie."@en .
+ml:Tagging a owl:Class ; rdfs:label "Tagging"@en ;
+  rdfs:comment "N-ary relation: a User assigns a Tag to a Movie at a timestamp."@en .
+ml:TagRelevance a owl:Class ; rdfs:label "TagRelevance"@en ;
+  rdfs:comment "Relevance score (0..1) of a Tag for a Movie (genome-scores)."@en .
+ml:Genre a owl:Class ; rdfs:subClassOf skos:Concept ;
+  rdfs:label "Genre"@en ; rdfs:comment "Genre concept used to categorize movies."@en .
+ml:Session a owl:Class ; rdfs:label "Session"@en ;
+  rdfs:comment "A sequence of user interactions within a time window."@en .
+ml:Interaction a owl:Class ; rdfs:label "Interaction"@en ;
+  rdfs:comment "Implicit feedback event (e.g., impression, click, trailer_view)."@en .
+
+ml:hasRating a owl:ObjectProperty ; rdfs:domain ml:User ; rdfs:range ml:Rating ;
+  rdfs:label "has rating"@en ; rdfs:comment "Connects a User to a Rating instance."@en .
+ml:ratedItem a owl:ObjectProperty ; rdfs:domain ml:Rating ; rdfs:range ml:Movie ;
+  rdfs:label "rated item"@en ; rdfs:comment "Connects a Rating to the rated Movie."@en .
+ml:hasTagging a owl:ObjectProperty ; rdfs:domain ml:User ; rdfs:range ml:Tagging ;
+  rdfs:label "has tagging"@en ; rdfs:comment "Connects a User to a Tagging event."@en .
+ml:taggingOfMovie a owl:ObjectProperty ; rdfs:domain ml:Tagging ; rdfs:range ml:Movie ;
+  rdfs:label "tagging of movie"@en ; rdfs:comment "Movie to which the Tagging refers."@en .
+ml:taggingHasTag a owl:ObjectProperty ; rdfs:domain ml:Tagging ; rdfs:range ml:Tag ;
+  rdfs:label "tag used in tagging"@en ; rdfs:comment "The tag used in the Tagging event."@en .
+ml:hasGenre a owl:ObjectProperty ; rdfs:domain ml:Movie ; rdfs:range ml:Genre ;
+  rdfs:label "has genre"@en ; rdfs:comment "Associates a Movie with a Genre concept."@en .
+ml:hasTagRelevance a owl:ObjectProperty ; rdfs:domain ml:Movie ; rdfs:range ml:TagRelevance ;
+  rdfs:label "has tag relevance"@en ; rdfs:comment "Connects a Movie to a TagRelevance record."@en .
+ml:relevanceTag a owl:ObjectProperty ; rdfs:domain ml:TagRelevance ; rdfs:range ml:Tag ;
+  rdfs:label "relevance tag"@en ; rdfs:comment "The tag for which the relevance score applies."@en .
+ml:inSession a owl:ObjectProperty ; rdfs:domain ml:Interaction ; rdfs:range ml:Session ;
+  rdfs:label "in session"@en ; rdfs:comment "Assigns an Interaction to a Session."@en .
+ml:interactionItem a owl:ObjectProperty ; rdfs:domain ml:Interaction ; rdfs:range ml:Movie ;
+  rdfs:label "interaction item"@en ; rdfs:comment "The movie the implicit interaction refers to."@en .
+ml:interactionUser a owl:ObjectProperty ; rdfs:domain ml:Interaction ; rdfs:range ml:User ;
+  rdfs:label "interaction user"@en ; rdfs:comment "The user who performed the interaction."@en .
+
+ml:ratingValue a owl:DatatypeProperty ; rdfs:domain ml:Rating ; rdfs:range xsd:decimal ;
+  rdfs:label "rating value"@en ; rdfs:comment "Star value (e.g., 0.5–5.0) for a rating."@en .
+ml:ratingTimestamp a owl:DatatypeProperty ; rdfs:domain ml:Rating ; rdfs:range xsd:dateTime ;
+  rdfs:label "rating timestamp"@en ; rdfs:comment "When the rating was created."@en .
+ml:taggingTimestamp a owl:DatatypeProperty ; rdfs:domain ml:Tagging ; rdfs:range xsd:dateTime ;
+  rdfs:label "tagging timestamp"@en ; rdfs:comment "When the tagging occurred."@en .
+ml:relevanceScore a owl:DatatypeProperty ; rdfs:domain ml:TagRelevance ; rdfs:range xsd:float ;
+  rdfs:label "relevance score"@en ; rdfs:comment "Value in [0,1] indicating tag relevance."@en .
+ml:tmdbId a owl:DatatypeProperty ; rdfs:domain ml:Movie ; rdfs:range xsd:integer ;
+  rdfs:label "TMDB id"@en ; rdfs:comment "TMDB movie id (from links.csv)."@en .
+ml:imdbId a owl:DatatypeProperty ; rdfs:domain ml:Movie ; rdfs:range xsd:integer ;
+  rdfs:label "IMDB id"@en ; rdfs:comment "IMDB numeric id (from links.csv)."@en .
+ml:movieTitle a owl:DatatypeProperty ; rdfs:domain ml:Movie ; rdfs:range xsd:string ;
+  rdfs:label "movie title"@en ; rdfs:comment "Plain-text movie title (from movies.csv)."@en .
+ml:genreLabel a owl:DatatypeProperty ; rdfs:domain ml:Genre ; rdfs:range xsd:string ;
+  rdfs:label "genre label"@en ; rdfs:comment "Human-readable genre label."@en .
+ml:userAge a owl:DatatypeProperty ; rdfs:domain ml:User ; rdfs:range xsd:integer ;
+  rdfs:label "user age"@en ; rdfs:comment "Age or age bucket of the user."@en .
+ml:userGender a owl:DatatypeProperty ; rdfs:domain ml:User ; rdfs:range xsd:string ;
+  rdfs:label "user gender"@en ; rdfs:comment "Gender code if available (M/F/...)."@en .
+ml:userOccupation a owl:DatatypeProperty ; rdfs:domain ml:User ; rdfs:range xsd:string ;
+  rdfs:label "user occupation"@en ; rdfs:comment "Occupation label from user_profiles.csv."@en .
+ml:signupYear a owl:DatatypeProperty ; rdfs:domain ml:User ; rdfs:range xsd:gYear ;
+  rdfs:label "signup year"@en ; rdfs:comment "Year when the user signed up."@en .
+ml:interactionType a owl:DatatypeProperty ; rdfs:domain ml:Interaction ; rdfs:range xsd:string ;
+  rdfs:label "interaction type"@en ; rdfs:comment "Type of implicit feedback (impression/click/...)."@en .
+ml:interactionTime a owl:DatatypeProperty ; rdfs:domain ml:Interaction ; rdfs:range xsd:dateTime ;
+  rdfs:label "interaction time"@en ; rdfs:comment "When the implicit interaction occurred."@en .
