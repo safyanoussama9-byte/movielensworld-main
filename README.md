@@ -22,3 +22,18 @@ Dieses Projekt folgt **dem gleichen Stil** wie das bereitgestellte Beispielrepo 
 
 ## Quelle für Datensätze
 - Sammlung: RUCAIBox **RecSysDatasets** (MovieLens, Yelp, Amazon, …)
+<<<<<<< HEAD
+=======
+## SPARQL-Queries ausführen
+
+**Option A (GUI, empfohlen): Apache Jena Fuseki**
+1. Fuseki starten → http://localhost:3030
+2. Neues Dataset anlegen (z. B. `movielens`)
+3. Datei `src/movielens_transformed.ttl` hochladen
+4. Im Tab **Query** ausführen – Prefix:
+PREFIX movie: http://example.org/movielens/
+
+PREFIX xsd: http://www.w3.org/2001/XMLSchema#
+
+5. Fragen aus `sparql_queries.md` verwenden
+>>>>>>> 647dfb9 (Initial commit - add project)

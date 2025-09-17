@@ -1,0 +1,1 @@
+Run: `py -m pip install rdflib` then `py src\transform_to_rdf_nopandas.py --root .`

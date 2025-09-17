@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # DBpedia – 25 SPARQL Queries (MovieLens/Film-Thema)
 
 Endpoint: https://dbpedia.org/sparql  
@@ -474,3 +475,199 @@ ORDER BY DESC(?year)
 LIMIT 100
 ```
 **Erklärung:** Aggregiert `starring`-Werte je Film und sortiert nach Jahr.
+=======
+﻿# MovieLens – 25 SPARQL-Queries (auf dem eigenen Graphen)
+
+Alle Queries sind für den Graphen `src/movielens_transformed.ttl` mit folgendem Namespace:
+PREFIX movie: <http://example.org/movielens/>
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+
+## 1) Liste aller Filme (URI + Titel)
+SELECT ?m ?title WHERE { ?m a movie:Movie ; movie:title ?title . } LIMIT 50
+
+## 2) Filme, deren Titel mit „A“ beginnt
+SELECT ?title WHERE {
+  ?m a movie:Movie ; movie:title ?title .
+  FILTER(STRSTARTS(LCASE(?title), "a"))
+} LIMIT 50
+
+## 3) Anzahl aller Filme
+SELECT (COUNT(?m) AS ?count) WHERE { ?m a movie:Movie . }
+
+## 4) Alle Genres (Rohtext, distinct)
+SELECT DISTINCT ?g WHERE { ?m a movie:Movie ; movie:genres ?g . } ORDER BY ?g
+
+## 5) Filme mit „Action“ im Genre
+SELECT ?title WHERE {
+  ?m a movie:Movie ; movie:title ?title ; movie:genres ?g .
+  FILTER(CONTAINS(LCASE(?g), "action"))
+} LIMIT 50
+
+## 6) Ratings-Tripel zählen
+SELECT (COUNT(?r) AS ?ratings) WHERE { ?r a movie:Rating . }
+
+## 7) Durchschnittsrating je Film
+SELECT ?m ?title (AVG(xsd:decimal(?val)) AS ?avg)
+WHERE {
+  ?r a movie:Rating ; movie:movie ?m ; movie:rating ?val .
+  ?m movie:title ?title .
+}
+GROUP BY ?m ?title
+ORDER BY DESC(?avg)
+LIMIT 20
+
+## 8) Anzahl Ratings je Film
+SELECT ?m ?title (COUNT(?r) AS ?numRatings)
+WHERE {
+  ?r a movie:Rating ; movie:movie ?m .
+  ?m movie:title ?title .
+}
+GROUP BY ?m ?title
+ORDER BY DESC(?numRatings)
+LIMIT 20
+
+## 9) Nutzer mit den meisten Bewertungen
+SELECT ?u (COUNT(?r) AS ?num)
+WHERE { ?r a movie:Rating ; movie:user ?u . }
+GROUP BY ?u
+ORDER BY DESC(?num)
+LIMIT 20
+
+## 10) Durchschnittsrating eines konkreten Films (Titel = Toy Story (1995))
+SELECT (AVG(xsd:decimal(?val)) AS ?avg)
+WHERE {
+  ?m a movie:Movie ; movie:title ?title .
+  FILTER(STR(?title) = "Toy Story (1995)")
+  ?r a movie:Rating ; movie:movie ?m ; movie:rating ?val .
+}
+
+## 11) Filme mit AVG >= 4.0 und >= 50 Ratings
+SELECT ?title (AVG(xsd:decimal(?val)) AS ?avg) (COUNT(?r) AS ?cnt)
+WHERE {
+  ?r a movie:Rating ; movie:movie ?m ; movie:rating ?val .
+  ?m movie:title ?title .
+}
+GROUP BY ?m ?title
+HAVING (AVG(xsd:decimal(?val)) >= 4.0 && COUNT(?r) >= 50)
+ORDER BY DESC(?avg)
+LIMIT 20
+
+## 12) Neueste 20 Bewertungen (Timestamp absteigend)
+SELECT ?u ?title ?val ?ts
+WHERE {
+  ?r a movie:Rating ; movie:user ?u ; movie:movie ?m ; movie:rating ?val ; movie:timestamp ?ts .
+  ?m movie:title ?title .
+}
+ORDER BY DESC(xsd:integer(?ts))
+LIMIT 20
+
+## 13) Nutzer, die Action-Filme >= 4.5 im Mittel bewerten
+SELECT ?u (AVG(xsd:decimal(?val)) AS ?avg)
+WHERE {
+  ?r a movie:Rating ; movie:user ?u ; movie:movie ?m ; movie:rating ?val .
+  ?m movie:genres ?g .
+  FILTER(CONTAINS(LCASE(?g), "action"))
+}
+GROUP BY ?u
+HAVING (AVG(xsd:decimal(?val)) >= 4.5)
+ORDER BY DESC(?avg)
+LIMIT 20
+
+## 14) Filme ohne Bewertungen
+SELECT ?title WHERE {
+  ?m a movie:Movie ; movie:title ?title .
+  FILTER NOT EXISTS { ?r a movie:Rating ; movie:movie ?m . }
+} LIMIT 50
+
+## 15) Anzahl unterschiedlicher Nutzer
+SELECT (COUNT(DISTINCT ?u) AS ?users)
+WHERE { ?r a movie:Rating ; movie:user ?u . }
+
+## 16) Top-Genres nach Anzahl bewerteter Filme (String-basiert)
+SELECT ?genre (COUNT(DISTINCT ?m) AS ?cnt)
+WHERE {
+  ?r a movie:Rating ; movie:movie ?m .
+  ?m movie:genres ?g .
+  BIND(?g AS ?genre)
+}
+GROUP BY ?genre
+ORDER BY DESC(?cnt)
+LIMIT 20
+
+## 17) Filme mit Comedy UND Romance
+SELECT ?title WHERE {
+  ?m a movie:Movie ; movie:title ?title ; movie:genres ?g .
+  FILTER(CONTAINS(LCASE(?g), "comedy") && CONTAINS(LCASE(?g), "romance"))
+} LIMIT 50
+
+## 18) Durchschnittsrating je Nutzer
+SELECT ?u (AVG(xsd:decimal(?val)) AS ?avg)
+WHERE { ?r a movie:Rating ; movie:user ?u ; movie:rating ?val . }
+GROUP BY ?u
+ORDER BY DESC(?avg)
+LIMIT 20
+
+## 19) Nutzer, die denselben Film >= 2× bewertet haben
+SELECT ?u ?m (COUNT(?r) AS ?cnt)
+WHERE { ?r a movie:Rating ; movie:user ?u ; movie:movie ?m . }
+GROUP BY ?u ?m
+HAVING (COUNT(?r) >= 2)
+ORDER BY DESC(?cnt)
+LIMIT 20
+
+## 20) Filme mit frühestem Rating (min Timestamp)
+SELECT ?title (MIN(xsd:integer(?ts)) AS ?firstTs)
+WHERE {
+  ?r a movie:Rating ; movie:movie ?m ; movie:timestamp ?ts .
+  ?m movie:title ?title .
+}
+GROUP BY ?m ?title
+ORDER BY ?firstTs
+LIMIT 20
+
+## 21) Filme mit vielen identischen Ratings (z. B. viele 5.0)
+SELECT ?m ?title ?val (COUNT(?u) AS ?numUsers)
+WHERE {
+  ?r a movie:Rating ; movie:movie ?m ; movie:user ?u ; movie:rating ?val .
+  ?m movie:title ?title .
+}
+GROUP BY ?m ?title ?val
+HAVING (COUNT(?u) >= 10)
+ORDER BY DESC(?numUsers)
+LIMIT 20
+
+## 22) Filme ohne Genre (leer / "(no genres listed)")
+SELECT ?title WHERE {
+  ?m a movie:Movie ; movie:title ?title .
+  OPTIONAL { ?m movie:genres ?g . }
+  FILTER(!BOUND(?g) || LCASE(STR(?g))="(no genres listed)" || STRLEN(STR(?g))=0)
+} LIMIT 50
+
+## 23) Durchschnittsrating je Genre (String-basiert)
+SELECT ?genre (AVG(xsd:decimal(?val)) AS ?avg)
+WHERE {
+  ?r a movie:Rating ; movie:movie ?m ; movie:rating ?val .
+  ?m movie:genres ?g .
+  BIND(?g AS ?genre)
+}
+GROUP BY ?genre
+ORDER BY DESC(?avg)
+LIMIT 20
+
+## 24) Beste Filme eines Nutzers (ID 1)
+SELECT ?title ?val
+WHERE {
+  ?r a movie:Rating ; movie:user movie:user/1 ; movie:movie ?m ; movie:rating ?val .
+  ?m movie:title ?title .
+}
+ORDER BY DESC(xsd:decimal(?val))
+LIMIT 20
+
+## 25) Ø-Rating nur für Action-Filme
+SELECT (AVG(xsd:decimal(?val)) AS ?avgAction)
+WHERE {
+  ?r a movie:Rating ; movie:movie ?m ; movie:rating ?val .
+  ?m movie:genres ?g .
+  FILTER(CONTAINS(LCASE(?g), "action"))
+}
+>>>>>>> 647dfb9 (Initial commit - add project)
